@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./model:/app/model
+      - ./data:/app/data
+    environment: []
+
+
+

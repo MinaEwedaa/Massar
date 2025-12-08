@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+html,
+body {
+  @apply min-h-screen bg-[#0b1226] text-[#e6ecff];
+  background: radial-gradient(circle at 20% 20%, rgba(68, 95, 194, 0.12), transparent 25%),
+    radial-gradient(circle at 80% 0%, rgba(255, 200, 66, 0.12), transparent 20%),
+    #0b1226;
+  color-scheme: dark;
+}

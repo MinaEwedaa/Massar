@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-label="Massar logo">
+  <rect width="640" height="300" fill="#0c1a48"/>
+  <g fill="#f5c842">
+    <path d="M70 196h500v14H70z"/>
+    <path d="M96 110c0-18 15-33 33-33h383c25 0 45 20 45 45v62c0 14-11 25-25 25H112c-15 0-27-12-27-27z" stroke="#f5c842" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="176" cy="208" r="34"/>
+    <circle cx="464" cy="208" r="34"/>
+    <circle cx="176" cy="208" r="18"/>
+    <circle cx="464" cy="208" r="18"/>
+    <path d="M126 176h56M458 176h56" stroke="#f5c842" stroke-width="12" stroke-linecap="round"/>
+    <path d="M142 126h356c8 0 14 6 14 14v42c0 8-6 14-14 14H142c-8 0-14-6-14-14v-42c0-8 6-14 14-14z" fill="none" stroke="#f5c842" stroke-width="10" stroke-linejoin="round"/>
+    <text x="140" y="185" font-family="Inter, 'Segoe UI', sans-serif" font-weight="800" font-size="86" fill="#f5c842">MASSAR</text>
+  </g>
+</svg>
+

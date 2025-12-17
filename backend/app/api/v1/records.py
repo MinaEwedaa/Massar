@@ -6,23 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
 from ...cleaning import clean_record
-from ...crud import create_prediction, get_record, list_records
+from ...crud import create_prediction, get_record, list_predictions_with_records, list_records
 from ...db import get_session
 from ...feature_engineering import create_features
 from ...model_server import ModelNotLoadedError, model_server
 from ...models import Record
-from ...schemas import RecordOut
+from ...schemas import PredictionWithRecord, RecordOut
 
 router = APIRouter(prefix="/api/v1/records", tags=["records"])
-
-
-@router.get("/{record_id}", response_model=RecordOut)
-def read_record(record_id: int, session: Session = Depends(get_session)) -> RecordOut:
-    """Fetch a record by id."""
-    record = get_record(session, record_id)
-    if not record:
-        raise HTTPException(status_code=404, detail="Record not found")
-    return RecordOut.from_orm(record)
 
 
 @router.get("/", response_model=list[RecordOut])
@@ -34,6 +25,35 @@ def list_records_endpoint(
     """List records with pagination."""
     records = list_records(session, limit=limit, offset=offset)
     return [RecordOut.from_orm(r) for r in records]
+
+
+@router.get("/predictions", response_model=list[PredictionWithRecord])
+def list_predictions_endpoint(
+    limit: int = Query(default=20, le=100),
+    offset: int = Query(default=0, ge=0),
+    session: Session = Depends(get_session),
+) -> list[PredictionWithRecord]:
+    """List recent predictions with their associated records."""
+    predictions_with_records = list_predictions_with_records(session, limit=limit, offset=offset)
+    return [
+        PredictionWithRecord(
+            id=pred.id,
+            predicted_delay=pred.predicted_delay,
+            model_version=pred.model_version,
+            created_at=pred.created_at,
+            record=RecordOut.from_orm(rec),
+        )
+        for pred, rec in predictions_with_records
+    ]
+
+
+@router.get("/{record_id}", response_model=RecordOut)
+def read_record(record_id: int, session: Session = Depends(get_session)) -> RecordOut:
+    """Fetch a record by id."""
+    record = get_record(session, record_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    return RecordOut.from_orm(record)
 
 
 @router.put("/{record_id}", response_model=RecordOut)

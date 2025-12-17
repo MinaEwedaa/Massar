@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Backend Connection Test</h1>
+    <button onclick="testConnection()">Test Backend Connection</button>
+    <div id="result"></div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing connection...</p>';
+
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch('http://localhost:8000/api/v1/health');
+                const healthData = await healthResponse.json();
+                
+                let html = '<h2 class="success">✓ Backend is accessible!</h2>';
+                html += '<pre>' + JSON.stringify(healthData, null, 2) + '</pre>';
+
+                // Test predict endpoint
+                try {
+                    const predictResponse = await fetch('http://localhost:8000/api/v1/predict?persist=false', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            route_id: "R1",
+                            scheduled_time: new Date().toISOString(),
+                            weather: "sunny",
+                            passenger_count: 50,
+                            latitude: 24.5,
+                            longitude: 32.5
+                        })
+                    });
+
+                    if (predictResponse.ok) {
+                        const predictData = await predictResponse.json();
+                        html += '<h3 class="success">✓ Predict endpoint works!</h3>';
+                        html += '<pre>Predicted delay: ' + predictData.predicted_delay + ' minutes</pre>';
+                    } else {
+                        const errorText = await predictResponse.text();
+                        html += '<h3 class="error">✗ Predict endpoint error</h3>';
+                        html += '<pre>' + errorText + '</pre>';
+                    }
+                } catch (err) {
+                    html += '<h3 class="error">✗ Predict endpoint error: ' + err.message + '</h3>';
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<h2 class="error">✗ Connection failed</h2><pre>' + error.message + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>
+

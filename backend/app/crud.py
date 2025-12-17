@@ -36,5 +36,18 @@ def create_prediction(session: Session, record_id: int, predicted_delay: float, 
     return prediction
 
 
+def list_predictions_with_records(session: Session, limit: int = 20, offset: int = 0) -> List[tuple[Prediction, Record]]:
+    """List predictions with their associated records."""
+    statement = (
+        select(Prediction, Record)
+        .join(Record, Prediction.record_id == Record.id)
+        .order_by(Prediction.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    results = session.exec(statement).all()
+    return [(pred, rec) for pred, rec in results]
+
+
 
 

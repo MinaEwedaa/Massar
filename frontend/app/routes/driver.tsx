@@ -1,7 +1,7 @@
 import type { Route } from "./+types/driver";
 import { Link, NavLink } from "react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ingestRecord, type IngestResponse } from "../lib/api";
+import { ingestRecord, predictDelay, type IngestResponse } from "../lib/api";
 
 const weatherOptions = ["Clear", "Cloudy", "Rainy", "Stormy", "Windy"];
 
@@ -73,21 +73,45 @@ export default function Driver() {
         longitude: coords.longitude ?? null,
       };
 
+      // First, get prediction
+      const predictionRes = await predictDelay(payload, false);
+      setPrediction(predictionRes.predicted_delay);
+
+      // Then, ingest the record
       const res = await ingestRecord(payload);
       const record =
         "record" in (res as IngestResponse) && (res as any).record
           ? (res as any).record
           : (res as any);
-      const predictionValue =
-        "prediction" in (res as IngestResponse) && (res as any).prediction
-          ? (res as any).prediction.predicted_delay
-          : null;
 
-      setFeedback("Trip data submitted and stored successfully.");
+      setFeedback("Trip data submitted and prediction generated successfully.");
       setRecordId(record?.id ?? null);
-      setPrediction(predictionValue);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Failed to submit trip data.");
+      let errorMessage = "Failed to submit trip data.";
+      
+      if (err?.response?.data) {
+        // Handle FastAPI validation errors (array format)
+        if (Array.isArray(err.response.data.detail)) {
+          const errors = err.response.data.detail.map((e: any) => 
+            `${e.loc?.join('.') || 'field'}: ${e.msg || 'Invalid value'}`
+          ).join(', ');
+          errorMessage = `Validation error: ${errors}`;
+        } 
+        // Handle single error message
+        else if (err.response.data.detail) {
+          errorMessage = typeof err.response.data.detail === 'string' 
+            ? err.response.data.detail 
+            : JSON.stringify(err.response.data.detail);
+        }
+        // Handle other error formats
+        else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

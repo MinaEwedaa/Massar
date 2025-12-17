@@ -3,8 +3,10 @@ import { NavLink } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   fetchMetrics,
+  fetchPredictions,
   fetchRecords,
   type Metrics,
+  type PredictionWithRecord,
   type RecordOut,
 } from "../lib/api";
 import {
@@ -43,6 +45,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [records, setRecords] = useState<RecordOut[]>([]);
+  const [predictions, setPredictions] = useState<PredictionWithRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,11 +53,40 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [m, r] = await Promise.all([fetchMetrics(), fetchRecords(20)]);
+      const [m, r, p] = await Promise.all([
+        fetchMetrics(),
+        fetchRecords(20),
+        fetchPredictions(10),
+      ]);
       setMetrics(m);
       setRecords(r);
+      setPredictions(p);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Unable to load dashboard data.");
+      let errorMessage = "Unable to load dashboard data.";
+      
+      if (err?.response?.data) {
+        // Handle FastAPI validation errors (array format)
+        if (Array.isArray(err.response.data.detail)) {
+          const errors = err.response.data.detail.map((e: any) => 
+            `${e.loc?.join('.') || 'field'}: ${e.msg || 'Invalid value'}`
+          ).join(', ');
+          errorMessage = `Validation error: ${errors}`;
+        } 
+        // Handle single error message
+        else if (err.response.data.detail) {
+          errorMessage = typeof err.response.data.detail === 'string' 
+            ? err.response.data.detail 
+            : JSON.stringify(err.response.data.detail);
+        }
+        // Handle other error formats
+        else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,7 +100,7 @@ export default function Dashboard() {
 
   const totalRecords = metrics?.total_records ?? 2458672;
   const totalPredictions = metrics?.total_predictions ?? Math.round(totalRecords * 0.45);
-  const modelVersion = metrics?.last_model_version ?? "XGBoost v1.4";
+  const modelVersion = metrics?.last_model_version ?? "Linear Regression v1.0";
 
   const series = useMemo(() => {
     const fallback = Array.from({ length: 10 }).map((_, i) => ({
@@ -627,6 +659,60 @@ export default function Dashboard() {
               <span>Showing {routePerformance.length} routes</span>
               <span>Scroll for more</span>
             </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#1f2b4d] bg-[#111a32] px-4 py-4 shadow-[0_15px_45px_rgba(0,0,0,0.35)]">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">Recent Predictions & Insights</h2>
+            <span className="text-xs text-[#8fa2ce]">Live predictions</span>
+          </div>
+          <div className="mt-4 space-y-3">
+            {loading ? (
+              <div className="text-center py-8 text-[#8fa2ce]">Loading predictions...</div>
+            ) : predictions.length === 0 ? (
+              <div className="text-center py-8 text-[#8fa2ce]">
+                No predictions yet. Submit data from the Driver page to see predictions here.
+              </div>
+            ) : (
+              predictions.map((pred) => (
+                <div
+                  key={pred.id}
+                  className="rounded-xl border border-[#1f2b4d] bg-[#0d1530]/70 px-4 py-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-semibold text-white">{pred.record.route_id}</span>
+                        <span className="text-xs text-[#8fa2ce]">
+                          {new Date(pred.record.scheduled_time).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-4 text-xs text-[#8fa2ce]">
+                        <span>Passengers: {pred.record.passenger_count ?? "N/A"}</span>
+                        <span>Weather: {pred.record.weather}</span>
+                        {pred.record.delay_minutes !== null && (
+                          <span className="text-[#f97373]">
+                            Actual Delay: {pred.record.delay_minutes.toFixed(1)} min
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-semibold text-[#f5c842]">
+                        {pred.predicted_delay.toFixed(1)} min
+                      </div>
+                      <div className="text-xs text-[#8fa2ce]">Predicted</div>
+                      {pred.record.delay_minutes !== null && (
+                        <div className="mt-1 text-xs text-[#6b7cab]">
+                          Error: {Math.abs(pred.predicted_delay - pred.record.delay_minutes).toFixed(1)} min
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </div>

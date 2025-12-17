@@ -2,8 +2,14 @@
 
 from dataclasses import dataclass
 
-MODEL_PATH = "./model/model.joblib"
-DATABASE_URL = "sqlite:///./data/db.sqlite"
+import os
+from pathlib import Path
+
+# Get the absolute path to the model file
+# __file__ is backend/app/config.py, so we go up one level to backend/
+_BACKEND_DIR = Path(__file__).parent.parent.resolve()
+MODEL_PATH = os.getenv("MODEL_PATH", str(_BACKEND_DIR / "model" / "model.joblib"))
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/db.sqlite")
 ALLOWED_WEATHER = ["sunny", "cloudy", "rainy", "snow", "clear", "fog"]
 MAX_PASSENGER = 200
 MIN_PASSENGER = 0

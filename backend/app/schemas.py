@@ -57,5 +57,18 @@ class HealthOut(BaseModel):
     model_path: str
 
 
+class PredictionWithRecord(BaseModel):
+    """Prediction with associated record data."""
+
+    id: int
+    predicted_delay: float
+    model_version: str
+    created_at: datetime
+    record: RecordOut
+
+    class Config:
+        orm_mode = True
+
+
 
 

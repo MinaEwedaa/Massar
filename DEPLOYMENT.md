@@ -24,13 +24,19 @@ git push origin main
 1. Go to [Railway.app](https://railway.app) and sign up/login
 2. Click "New Project" → "Deploy from GitHub repo"
 3. Select your `MinaEwedaa/Massar` repository
-4. Railway will detect the `backend/` directory automatically
-5. Set environment variables in Railway dashboard:
-   - `CORS_ORIGINS`: Your frontend URL (e.g., `https://your-frontend.vercel.app`)
+4. **IMPORTANT**: After the service is created, go to Settings → Source → Root Directory and set it to `backend`
+   - This tells Railway to use the `backend/` folder as the project root
+   - Alternatively, you can use the Railway CLI: `railway link` then set root directory
+5. Railway will now detect Python and use the `Procfile` or `Dockerfile` in the backend directory
+6. Set environment variables in Railway dashboard (Variables tab):
+   - `CORS_ORIGINS`: Your frontend URL (e.g., `https://your-frontend.vercel.app`) - set this after deploying frontend
    - `DATABASE_URL`: Leave default (Railway provides SQLite) or set to PostgreSQL if needed
-   - `MODEL_PATH`: `/app/model/model.joblib` (default)
-6. Railway will automatically deploy and provide a URL like `https://your-app.up.railway.app`
-7. Copy this URL - you'll need it for the frontend
+   - `MODEL_PATH`: `/app/model/model.joblib` (default, only if using Docker)
+   - `PORT`: Railway sets this automatically, but ensure your start command uses `$PORT`
+7. Railway will automatically deploy and provide a URL like `https://your-app.up.railway.app`
+8. Copy this URL - you'll need it for the frontend
+
+**Note**: If Railway still can't detect the project, it will use the Dockerfile in the `backend/` directory automatically once the root directory is set.
 
 ### Option B: Render
 

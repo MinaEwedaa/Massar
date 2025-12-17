@@ -8,7 +8,14 @@ from pathlib import Path
 # Get the absolute path to the model file
 # __file__ is backend/app/config.py, so we go up one level to backend/
 _BACKEND_DIR = Path(__file__).parent.parent.resolve()
-MODEL_PATH = os.getenv("MODEL_PATH", str(_BACKEND_DIR / "model" / "model.joblib"))
+
+# Handle empty string from environment variable (Railway might set it to empty)
+# If MODEL_PATH is not set or is empty, use default path
+_MODEL_PATH_ENV = os.getenv("MODEL_PATH", "").strip()
+if not _MODEL_PATH_ENV:
+    MODEL_PATH = str(_BACKEND_DIR / "model" / "model.joblib")
+else:
+    MODEL_PATH = _MODEL_PATH_ENV
 
 # Handle empty string from environment variable (Railway might set it to empty)
 # If DATABASE_URL is not set or is empty, use SQLite default

@@ -58,6 +58,16 @@ def on_startup() -> None:
         logger.exception("Failed to load model from %s: %s", MODEL_PATH, exc)
 
 
+@app.get("/")
+def root():
+    """Root endpoint - redirects to API docs."""
+    return {
+        "message": "Bus Delay Prediction API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/v1/health"
+    }
+
 app.include_router(health.router)
 app.include_router(ingest.router)
 app.include_router(predict.router)

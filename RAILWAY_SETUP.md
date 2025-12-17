@@ -1,35 +1,42 @@
 # Quick Railway Setup Guide
 
-## The Issue
-Railway is analyzing the root directory which contains both `backend/` and `frontend/` folders. Railway needs to know to use the `backend/` directory as the project root.
+## ✅ Automatic Configuration
 
-## Solution: Set Root Directory in Railway
+The project now includes a root-level `railway.json` file that tells Railway to:
+- Use the Dockerfile from `backend/Dockerfile`
+- Build and deploy the backend automatically
 
-### Step-by-Step:
+**You don't need to manually set the root directory anymore!**
 
-1. **After creating the project from GitHub:**
-   - Go to your Railway project dashboard
-   - Click on the service that was created
-   - Go to **Settings** tab
-   - Scroll down to **Source** section
-   - Find **Root Directory** field
-   - Set it to: `backend`
-   - Click **Save**
+## Step-by-Step Deployment:
+
+1. **Create the project in Railway:**
+   - Go to [Railway.app](https://railway.app) and sign up/login
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select your `MinaEwedaa/Massar` repository
+   - Railway will automatically detect the `railway.json` configuration
 
 2. **Railway will now:**
-   - Detect Python from `requirements.txt` in the `backend/` folder
-   - Use the `Procfile` or `Dockerfile` in the `backend/` directory
-   - Build and deploy correctly
+   - Use the Dockerfile from `backend/Dockerfile`
+   - Build the Python application
+   - Deploy automatically
 
 3. **Set Environment Variables:**
-   - Go to **Variables** tab
+   - Go to your service → **Variables** tab
    - Add: `CORS_ORIGINS` = `https://your-frontend-url.vercel.app` (set after deploying frontend)
    - `PORT` is automatically set by Railway
 
 4. **Deploy:**
-   - Railway will automatically redeploy when you set the root directory
+   - Railway will automatically build and deploy
    - Wait for the build to complete
    - Copy the generated URL (e.g., `https://your-app.up.railway.app`)
+
+## How It Works
+
+The root-level `railway.json` file tells Railway to:
+- Use Dockerfile builder
+- Point to `backend/Dockerfile` 
+- The Dockerfile is configured to copy files from the `backend/` directory when built from root
 
 ## Alternative: Using Railway CLI
 
@@ -45,16 +52,14 @@ railway login
 # Link to your project
 railway link
 
-# Set root directory
-railway variables set RAILWAY_ROOT_DIRECTORY=backend
-
 # Deploy
 railway up
 ```
 
 ## Troubleshooting
 
-- **Still getting "could not determine how to build":** Make sure the Root Directory is set to exactly `backend` (not `./backend` or `/backend`)
-- **Build fails:** Check that `requirements.txt` exists in the `backend/` directory
-- **Port errors:** Railway sets `$PORT` automatically - the `Procfile` and `start.sh` use this
+- **Still getting "could not determine how to build":** Make sure the `railway.json` file is in the root directory
+- **Build fails:** Check that `backend/Dockerfile` exists and `backend/requirements.txt` is present
+- **Port errors:** Railway sets `$PORT` automatically - the Dockerfile CMD uses this
+- **File not found errors:** The Dockerfile copies from `backend/` directory, so all paths are relative to root
 

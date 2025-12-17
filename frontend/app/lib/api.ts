@@ -17,16 +17,17 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
     if (error.code === "ECONNABORTED" || error.message === "Network Error") {
       error.response = {
         data: {
-          detail: "Unable to connect to the server. Please make sure the backend is running on http://localhost:8000",
+          detail: `Unable to connect to the server at ${apiUrl}. Please check if the backend is running and the VITE_API_BASE_URL environment variable is set correctly.`,
         },
       };
     } else if (!error.response) {
       error.response = {
         data: {
-          detail: "Network error: Unable to reach the server. Please check if the backend is running.",
+          detail: `Network error: Unable to reach the server at ${apiUrl}. Please check if the backend is running.`,
         },
       };
     }

@@ -18,7 +18,8 @@ RUN chmod +x ./start.sh
 EXPOSE 8000
 
 # Use the start script which properly handles PORT environment variable
-CMD ["./start.sh"]
+# Use shell form to ensure environment variables are expanded
+CMD ./start.sh
 
 
 

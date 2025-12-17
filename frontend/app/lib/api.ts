@@ -18,16 +18,33 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
-    if (error.code === "ECONNABORTED" || error.message === "Network Error") {
+    
+    // Log error details for debugging
+    console.error("API Error:", {
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      message: error.message,
+      code: error.code,
+    });
+    
+    if (error.code === "ECONNABORTED" || error.message === "Network Error" || error.code === "ERR_NETWORK") {
       error.response = {
         data: {
-          detail: `Unable to connect to the server at ${apiUrl}. Please check if the backend is running and the VITE_API_BASE_URL environment variable is set correctly.`,
+          detail: `Unable to connect to the server at ${apiUrl}. This could be due to: 1) Backend not running, 2) CORS not configured (check CORS_ORIGINS in Railway), 3) Network/firewall issue. Check browser console for details.`,
+        },
+      };
+    } else if (error.response?.status === 404) {
+      error.response = {
+        data: {
+          detail: `Endpoint not found. Check that the API URL is correct: ${apiUrl}`,
         },
       };
     } else if (!error.response) {
       error.response = {
         data: {
-          detail: `Network error: Unable to reach the server at ${apiUrl}. Please check if the backend is running.`,
+          detail: `Network error: Unable to reach the server at ${apiUrl}. Check: 1) Backend is running, 2) CORS is configured, 3) URL is correct.`,
         },
       };
     }

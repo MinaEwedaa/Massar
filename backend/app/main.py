@@ -20,6 +20,7 @@ app = FastAPI(title="Bus Delay Prediction API", version="1.0.0")
 allowed_origins_env = os.getenv("CORS_ORIGINS", "")
 if allowed_origins_env:
     allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+    logger.info("CORS origins from environment: %s", allowed_origins)
 else:
     # Default to localhost for development
     allowed_origins = [
@@ -30,6 +31,7 @@ else:
         "http://127.0.0.1:3001",
         "http://127.0.0.1:5173",
     ]
+    logger.info("Using default CORS origins (development mode): %s", allowed_origins)
 
 app.add_middleware(
     CORSMiddleware,

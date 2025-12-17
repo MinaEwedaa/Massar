@@ -9,7 +9,17 @@ from pathlib import Path
 # __file__ is backend/app/config.py, so we go up one level to backend/
 _BACKEND_DIR = Path(__file__).parent.parent.resolve()
 MODEL_PATH = os.getenv("MODEL_PATH", str(_BACKEND_DIR / "model" / "model.joblib"))
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/db.sqlite")
+
+# Handle empty string from environment variable (Railway might set it to empty)
+# If DATABASE_URL is not set or is empty, use SQLite default
+_DB_URL = os.getenv("DATABASE_URL", "").strip()
+if not _DB_URL:
+    # Ensure data directory exists for SQLite
+    _DATA_DIR = _BACKEND_DIR / "data"
+    _DATA_DIR.mkdir(exist_ok=True)
+    DATABASE_URL = "sqlite:///./data/db.sqlite"
+else:
+    DATABASE_URL = _DB_URL
 ALLOWED_WEATHER = ["sunny", "cloudy", "rainy", "snow", "clear", "fog"]
 MAX_PASSENGER = 200
 MIN_PASSENGER = 0

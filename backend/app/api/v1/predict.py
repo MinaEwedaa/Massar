@@ -38,8 +38,18 @@ async def predict_endpoint(
         features = create_features(cleaned)
         logger.info(f"Features shape: {features.shape}, columns: {list(features.columns)}")
         
-        prediction_value = float(model_server.predict(features)[0])
-        logger.info(f"Prediction: {prediction_value}")
+        # Use baseline predictor since model quality is poor (R² = 0.26)
+        # TODO: Retrain with more data (need 1,000-5,000+ rows) for better model
+        use_baseline = True  # Set to False to use the trained model (not recommended with current data)
+        
+        if use_baseline:
+            logger.warning(
+                "Using baseline predictor due to poor model quality. "
+                "Model R² = 0.26, RMSE = 221 min. Need more training data."
+            )
+        
+        prediction_value = float(model_server.predict(features, use_baseline=use_baseline)[0])
+        logger.info(f"Prediction: {prediction_value} minutes (baseline={use_baseline})")
 
         record_id = None
         if persist:

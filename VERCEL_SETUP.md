@@ -65,3 +65,6 @@ If you see `undefined` or `http://localhost:8000/api/v1`, the environment variab
 - **CORS errors**: Make sure `CORS_ORIGINS` in Railway includes your exact Vercel URL
 - **404 errors**: Check that the Railway URL is correct and the backend is running
 
+
+
+

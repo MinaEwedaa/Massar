@@ -40,3 +40,6 @@ The Dockerfile uses `CMD ./start.sh` which handles PORT correctly. Make sure:
 
 The configuration should work. If the error persists, it's likely a Railway platform issue with PORT validation.
 
+
+
+

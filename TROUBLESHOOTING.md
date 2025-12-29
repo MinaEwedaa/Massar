@@ -69,3 +69,6 @@ console.log('API URL:', import.meta.env.VITE_API_BASE_URL);
 
 This will show you what URL the frontend is trying to use. It should be your Railway URL.
 
+
+
+

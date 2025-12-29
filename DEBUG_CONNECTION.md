@@ -84,3 +84,6 @@ Check browser console (F12) for:
 - Console tab → See error messages
 - Check if request is being blocked by CORS
 
+
+
+
